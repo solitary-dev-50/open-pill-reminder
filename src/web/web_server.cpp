@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "web/web_server.h"
 
 #include <ArduinoJson.h>

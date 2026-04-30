@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "reminder_manager.h"
 
 #include <algorithm>

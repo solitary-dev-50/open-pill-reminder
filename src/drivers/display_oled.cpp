@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "drivers/display_oled.h"
 
 #include <Wire.h>

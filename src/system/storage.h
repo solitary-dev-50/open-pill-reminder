@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <Arduino.h>
@@ -14,4 +16,3 @@ class Storage {
  private:
   bool _ready = false;
 };
-

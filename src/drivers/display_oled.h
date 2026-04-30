@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <Adafruit_SSD1306.h>
@@ -16,4 +18,3 @@ class DisplayOled {
   Adafruit_SSD1306 _display;
   bool _ready = false;
 };
-

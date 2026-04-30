@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "drivers/buzzer.h"
 
 #include "app_config.h"

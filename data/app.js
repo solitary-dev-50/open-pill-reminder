@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 const state = {
   language: localStorage.getItem("open-pill-language") || "zh-CN",
   config: {

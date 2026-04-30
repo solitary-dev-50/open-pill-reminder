@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "system/time_service.h"
 
 #include <cstdio>

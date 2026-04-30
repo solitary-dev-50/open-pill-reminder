@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <WiFi.h>

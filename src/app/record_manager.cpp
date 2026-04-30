@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "app/record_manager.h"
 
 #include <ArduinoJson.h>

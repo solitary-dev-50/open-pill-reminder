@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "drivers/led.h"
 
 #include "app_config.h"

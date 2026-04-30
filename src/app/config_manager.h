@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <Arduino.h>
@@ -38,4 +40,3 @@ class ConfigManager {
   Storage* _storage = nullptr;
   DeviceConfig _config;
 };
-

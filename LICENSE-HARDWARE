@@ -1,0 +1,20 @@
+# 硬件许可说明
+
+English version: [LICENSE-HARDWARE.en.md](./LICENSE-HARDWARE.en.md)
+
+以下内容采用 `CERN Open Hardware Licence Version 2 - Strongly Reciprocal` (`CERN-OHL-S-2.0`)：
+
+- `DOC/PCB/` 目录中的文件
+- 原理图
+- PCB 工程文件
+- 硬件设计资料
+
+许可证名称：
+
+- CERN Open Hardware Licence Version 2 - Strongly Reciprocal
+
+官方链接：
+
+- https://ohwr.org/cern_ohl_s_v2.txt
+
+除非文件中另有说明，以上硬件设计资料默认适用该许可证。
