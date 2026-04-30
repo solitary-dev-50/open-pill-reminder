@@ -45,6 +45,14 @@ English version: [README.en.md](./README.en.md)
 
 - [`DOC/PCB/小药记.eprj2`](./DOC/PCB/%E5%B0%8F%E8%8D%AF%E8%AE%B0.eprj2)
 
+PCB 与原理图预览：
+
+- PCB 说明页：[DOC/PCB/README.md](./DOC/PCB/README.md)
+
+![PCB 预览](<./DOC/PCB/小药记PCB.png>)
+
+![PCB 3D 预览](<./DOC/PCB/小药记 3D图.png>)
+
 ## 当前状态
 
 当前版本基于：
@@ -117,6 +125,19 @@ V0.1 第一版聚焦这些能力：
 
 - `GPIO5 -> 轻触开关 -> GND`
 - `GPIO6 -> 轻触开关 -> GND`
+
+结构兼容约束：
+
+- 小药记 PCB 目标为完美适配树莓派 `Raspberry Pi 4B` 外壳
+- PCB 外形尺寸和安装孔位需要与该外壳方案匹配
+- `USB-C` 接口开孔位置需要与外壳对应
+- `OK` / `SET` 按键孔位需要与外壳对应
+
+这意味着 PCB 设计不仅是电气设计，还必须同时满足外壳装配与开孔约束。
+
+相关图纸与预览见：
+
+- [DOC/PCB/README.md](./DOC/PCB/README.md)
 
 ## 时间策略
 
@@ -249,3 +270,11 @@ $env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e 
 
 - 中文：[CONTRIBUTING.md](./CONTRIBUTING.md)
 - English: [CONTRIBUTING.en.md](./CONTRIBUTING.en.md)
+
+## 商业使用与定制
+
+小药记是一个完整开源项目。你可以根据本仓库许可证学习、修改、打样、生产和二次开发。
+
+如果你需要基于本项目做硬件定制、PCB 适配、固件修改、外壳结构、多语言本地化或小批量落地，可以联系项目维护者。
+
+本项目不是医疗设备，不提供医疗建议。

@@ -45,6 +45,14 @@ Current PCB project file:
 
 - [`DOC/PCB/小药记.eprj2`](./DOC/PCB/%E5%B0%8F%E8%8D%AF%E8%AE%B0.eprj2)
 
+PCB and schematic preview:
+
+- PCB notes page: [DOC/PCB/README.en.md](./DOC/PCB/README.en.md)
+
+![PCB preview](<./DOC/PCB/小药记PCB.png>)
+
+![PCB 3D preview](<./DOC/PCB/小药记 3D图.png>)
+
 ## Current Status
 
 Current development baseline:
@@ -117,6 +125,19 @@ Button wiring:
 
 - `GPIO5 -> tact switch -> GND`
 - `GPIO6 -> tact switch -> GND`
+
+Mechanical compatibility constraint:
+
+- The Open Pill Reminder PCB is intended to fit a `Raspberry Pi 4B` case
+- The PCB outline and mounting holes should match that enclosure direction
+- The `USB-C` connector position should align with the enclosure opening
+- The `OK` / `SET` button positions should align with enclosure button holes
+
+This means the PCB is not only an electrical design target, but also a mechanical fit target.
+
+Related drawings and previews:
+
+- [DOC/PCB/README.en.md](./DOC/PCB/README.en.md)
 
 ## Time Strategy
 
@@ -234,3 +255,11 @@ Contributions are welcome in:
 - Documentation
 - Localization
 - Testing and issue reports
+
+## Commercial Use and Customization
+
+Open Pill Reminder is a fully open source project. You may study, modify, prototype, manufacture, and build derivative work in accordance with the licenses used in this repository.
+
+If you need hardware customization, PCB adaptation, firmware modification, enclosure work, localization, or small-batch implementation based on this project, you may contact the project maintainer.
+
+This project is not a medical device and does not provide medical advice.
