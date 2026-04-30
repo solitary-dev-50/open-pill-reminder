@@ -207,17 +207,17 @@ DOC/          设计文档、知识库、PCB 工程文件
 常用命令：
 
 ```powershell
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1 -t upload
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1 -t buildfs
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1 -t uploadfs
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio device monitor -b 115200 -p COM10
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1 -t upload
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1 -t buildfs
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1 -t uploadfs
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio device monitor -b 115200 -p <your-port>
 ```
 
 如需切换到 `ESP32-C3`：
 
 ```powershell
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-c3-devkitm-1
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-c3-devkitm-1
 ```
 
 ## 文档入口
@@ -286,5 +286,7 @@ $env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e 
 小药记是一个完整开源项目。你可以根据本仓库许可证学习、修改、打样、生产和二次开发。
 
 如果你需要基于本项目做硬件定制、PCB 适配、固件修改、外壳结构、多语言本地化或小批量落地，可以联系项目维护者。
+
+如需定制或协作，可以在本仓库提交 Issue 联系维护者。
 
 本项目不是医疗设备，不提供医疗建议。

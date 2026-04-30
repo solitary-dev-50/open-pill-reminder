@@ -207,17 +207,17 @@ Default environment:
 Common commands:
 
 ```powershell
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1 -t upload
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1 -t buildfs
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-s3-devkitc-1 -t uploadfs
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio device monitor -b 115200 -p COM10
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1 -t upload
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1 -t buildfs
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-s3-devkitc-1 -t uploadfs
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio device monitor -b 115200 -p <your-port>
 ```
 
 To build for `ESP32-C3`:
 
 ```powershell
-$env:PLATFORMIO_CORE_DIR='e:\ESP32-S3\Open Pill Reminder\.pio-core'; pio run -e esp32-c3-devkitm-1
+$env:PLATFORMIO_CORE_DIR='.pio-core'; pio run -e esp32-c3-devkitm-1
 ```
 
 ## Documentation
@@ -271,5 +271,7 @@ Contributions are welcome in:
 Open Pill Reminder is a fully open source project. You may study, modify, prototype, manufacture, and build derivative work in accordance with the licenses used in this repository.
 
 If you need hardware customization, PCB adaptation, firmware modification, enclosure work, localization, or small-batch implementation based on this project, you may contact the project maintainer.
+
+For customization or collaboration, please open an issue in this repository.
 
 This project is not a medical device and does not provide medical advice.
