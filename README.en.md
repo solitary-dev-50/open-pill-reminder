@@ -2,9 +2,19 @@
 
 Chinese version: [README.md](./README.md)
 
+[![Build](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml/badge.svg)](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml)
+
 Open Pill Reminder is an offline-first, minimalist, fully open source pill reminder box project.
 
 This project is not a medical device. It does not provide medical advice and does not identify medicines, dosage, or efficacy. Version 0.1 focuses only on local reminders, local confirmation, and local records.
+
+## Quick Start
+
+- System overview: [DOC/Open_Pill_Reminder_Design.en.md](./DOC/Open_Pill_Reminder_Design.en.md)
+- Hardware notes: [DOC/KB/02_hardware_plan.en.md](./DOC/KB/02_hardware_plan.en.md)
+- PCB and schematic notes: [DOC/PCB/README.en.md](./DOC/PCB/README.en.md)
+- Build locally: `pio run -e esp32-s3-devkitc-1`
+- Build filesystem image: `pio run -e esp32-s3-devkitc-1 -t buildfs`
 
 ## Project Goal
 

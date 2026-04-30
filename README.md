@@ -2,9 +2,19 @@
 
 English version: [README.en.md](./README.en.md)
 
+[![Build](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml/badge.svg)](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml)
+
 一个离线优先、极简、完整开源的智能服药提醒盒项目。
 
 本项目不是医疗设备，不提供医疗建议，不判断药品种类、剂量或疗效。第一版只做本地提醒、用户确认和本地记录。
+
+## 快速开始
+
+- 看项目概览：[DOC/Open_Pill_Reminder_Design.md](./DOC/Open_Pill_Reminder_Design.md)
+- 看硬件方案：[DOC/KB/02_hardware_plan.md](./DOC/KB/02_hardware_plan.md)
+- 看 PCB 和原理图：[DOC/PCB/README.md](./DOC/PCB/README.md)
+- 本地编译：`pio run -e esp32-s3-devkitc-1`
+- 构建文件系统：`pio run -e esp32-s3-devkitc-1 -t buildfs`
 
 ## 项目目标
 
