@@ -1,5 +1,6 @@
 .pio/
 .pio-core/
+.tools/
 
 compile_commands.json
 
