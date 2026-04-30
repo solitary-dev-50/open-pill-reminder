@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>小药记 / Open Pill Reminder</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="panel header-bar">
+        <div>
+          <h1 data-i18n="app_title">小药记</h1>
+          <p class="muted" data-i18n="app_subtitle">V0.1 本地网页控制台</p>
+        </div>
+        <label class="lang-switch">
+          <span class="label" data-i18n="language">语言 / Language</span>
+          <select id="language-select">
+            <option value="zh-CN">中文</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </header>
+
+      <section class="panel">
+        <h2 data-i18n="status_title">设备状态</h2>
+        <div class="grid two">
+          <div><span class="label" data-i18n="current_time">当前时间</span><span id="current-time">--</span></div>
+          <div><span class="label" data-i18n="current_date">当前日期</span><span id="current-date">--</span></div>
+          <div><span class="label" data-i18n="reminder_state">提醒状态</span><span id="current-state">--</span></div>
+          <div><span class="label" data-i18n="time_status">时间状态</span><span id="time-status">--</span></div>
+          <div><span class="label" data-i18n="next_reminder">下次提醒</span><span id="next-reminder">--</span></div>
+          <div><span class="label" data-i18n="confirmed_summary">已确认 / 总数</span><span id="confirmed-summary">--</span></div>
+          <div><span class="label" data-i18n="time_source">时间来源</span><span id="time-source">--</span></div>
+          <div><span class="label" data-i18n="ap_ssid">热点名称</span><span id="ap-ssid">--</span></div>
+          <div><span class="label" data-i18n="device_ip">设备地址</span><span id="device-ip">--</span></div>
+        </div>
+        <div class="toolbar">
+          <button id="sync-time-btn" type="button" data-i18n="sync_time_btn">从浏览器同步时间</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="reminder_config_title">提醒配置</h2>
+        <div id="reminder-list" class="stack"></div>
+        <div class="toolbar">
+          <input id="new-reminder-time" type="time" />
+          <button id="add-reminder-btn" type="button" data-i18n="add_reminder">添加提醒</button>
+        </div>
+        <p class="muted" data-i18n="reminder_help">每天最多 8 个提醒，时间格式为 HH:MM。</p>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="global_settings_title">全局设置</h2>
+        <div class="grid two">
+          <label>
+            <span class="label" data-i18n="repeat_interval_label">重复提醒间隔（分钟）</span>
+            <input id="repeat-interval" type="number" min="1" max="1440" />
+            <span class="help-text" data-i18n="repeat_interval_help">未确认时，隔多少分钟再次提醒。</span>
+          </label>
+          <label>
+            <span class="label" data-i18n="max_repeat_label">最大重复提醒次数</span>
+            <input id="max-repeat-count" type="number" min="0" max="20" />
+            <span class="help-text" data-i18n="max_repeat_help">首次提醒后，最多再重复提醒多少次。</span>
+          </label>
+        </div>
+        <div class="toolbar">
+          <button id="save-config-btn" type="button" data-i18n="save_config">保存配置</button>
+          <button id="reload-btn" type="button" data-i18n="reload">重新读取</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="device_test_title">设备测试</h2>
+        <div class="toolbar wrap">
+          <button data-action="buzzer" type="button" data-i18n="test_buzzer">测试蜂鸣器</button>
+          <button data-action="led" type="button" data-i18n="test_led">测试指示灯</button>
+          <button data-action="oled" type="button" data-i18n="test_oled">测试 OLED</button>
+          <button data-action="trigger" type="button" data-i18n="test_trigger">立即触发提醒</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="today_records_title">今日日志</h2>
+        <pre id="today-records">[]</pre>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="messages_title">消息</h2>
+        <pre id="message-box">等待操作...</pre>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

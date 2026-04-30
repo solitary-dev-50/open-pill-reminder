@@ -1,0 +1,12 @@
+.pio/
+.pio-core/
+
+compile_commands.json
+
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/ipch/
+.vscode/launch.json
+
+串口日志.txt
+.pio-core/appstate.json

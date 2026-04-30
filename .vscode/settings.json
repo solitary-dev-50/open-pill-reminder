@@ -1,0 +1,12 @@
+{
+  "C_Cpp.default.configurationProvider": "platformio.platformio-ide",
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+  "C_Cpp.default.compilerPath": "${workspaceFolder}\\.pio-core\\packages\\toolchain-xtensa-esp32s3\\bin\\xtensa-esp32s3-elf-g++.exe",
+  "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+  "C_Cpp.default.cppStandard": "gnu++17",
+  "C_Cpp.default.cStandard": "gnu17",
+  "files.associations": {
+    "Arduino.h": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "enabled"
+}
