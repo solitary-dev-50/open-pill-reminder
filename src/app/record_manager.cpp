@@ -66,7 +66,7 @@ bool RecordManager::syncWithConfig(const DeviceConfig& config) {
 
   for (const ReminderConfig& reminder : config.reminders) {
     DailyRecordItem item;
-    DailyRecordItem* existing = findItemByReminderId(reminder.id);
+    const DailyRecordItem* existing = findItemByReminderId(reminder.id);
     if (existing != nullptr) {
       item = *existing;
     } else {
@@ -265,6 +265,15 @@ bool RecordManager::saveTodayRecord() const {
 
 DailyRecordItem* RecordManager::findItemByReminderId(const String& reminderId) {
   for (DailyRecordItem& item : _todayRecord.items) {
+    if (item.reminder_id == reminderId) {
+      return &item;
+    }
+  }
+  return nullptr;
+}
+
+const DailyRecordItem* RecordManager::findItemByReminderId(const String& reminderId) const {
+  for (const DailyRecordItem& item : _todayRecord.items) {
     if (item.reminder_id == reminderId) {
       return &item;
     }

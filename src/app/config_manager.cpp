@@ -4,22 +4,24 @@
 
 #include <ArduinoJson.h>
 
+#include <algorithm>
+
 #include "app_config.h"
 #include "system/storage.h"
 
 namespace {
 
 void logConfigSummary(const DeviceConfig& config, const char* prefix) {
-  Serial.printf(
-      "[配置] %s 提醒数=%u, repeat_interval_minutes=%u, max_repeat_count=%u\n", prefix,
-      static_cast<unsigned>(config.reminders.size()),
-      static_cast<unsigned>(config.repeat_interval_minutes),
-      static_cast<unsigned>(config.max_repeat_count));
+  Serial.printf("[配置] %s 提醒数=%u, repeat_interval_minutes=%u, max_repeat_count=%u\n",
+                prefix, static_cast<unsigned>(config.reminders.size()),
+                static_cast<unsigned>(config.repeat_interval_minutes),
+                static_cast<unsigned>(config.max_repeat_count));
 
   for (size_t index = 0; index < config.reminders.size(); ++index) {
     const ReminderConfig& reminder = config.reminders[index];
     Serial.printf("[配置] 提醒[%u] id=%s, time=%s, enabled=%s\n", static_cast<unsigned>(index),
-                  reminder.id.c_str(), reminder.time.c_str(), reminder.enabled ? "true" : "false");
+                  reminder.id.c_str(), reminder.time.c_str(),
+                  reminder.enabled ? "true" : "false");
   }
 }
 
@@ -68,22 +70,9 @@ bool ConfigManager::saveCurrent() {
 }
 
 bool ConfigManager::isValidTimeString(const String& value) {
-  if (value.length() != 5 || value.charAt(2) != ':') {
-    return false;
-  }
-
-  if (!isDigit(value.charAt(0)) || !isDigit(value.charAt(1)) || !isDigit(value.charAt(3)) ||
-      !isDigit(value.charAt(4))) {
-    return false;
-  }
-
   uint8_t hour = 0;
   uint8_t minute = 0;
-  if (!parseTimeString(value, hour, minute)) {
-    return false;
-  }
-
-  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+  return parseTimeString(value, hour, minute);
 }
 
 bool ConfigManager::parseTimeString(const String& value, uint8_t& hour, uint8_t& minute) {
@@ -132,7 +121,7 @@ bool ConfigManager::loadOrCreateDefault() {
   }
 
   _config = loadedConfig;
-  Serial.printf("[配置] 配置加载成功，来源=%s。\n", AppConfig::kConfigPath);
+  Serial.printf("[配置] 配置加载成功，来源：%s。\n", AppConfig::kConfigPath);
   logConfigSummary(_config, "当前配置：");
   return true;
 }
@@ -147,7 +136,7 @@ void ConfigManager::loadDefaults() {
 bool ConfigManager::parseJsonDocument(const String& json, DeviceConfig& outConfig,
                                       String& errorMessage) const {
   JsonDocument doc;
-  DeserializationError error = deserializeJson(doc, json);
+  const DeserializationError error = deserializeJson(doc, json);
   if (error) {
     errorMessage = String("JSON 解析失败: ") + error.c_str();
     return false;
@@ -158,13 +147,12 @@ bool ConfigManager::parseJsonDocument(const String& json, DeviceConfig& outConfi
       doc["repeat_interval_minutes"] | AppConfig::kDefaultRepeatIntervalMinutes;
   parsedConfig.max_repeat_count = doc["max_repeat_count"] | AppConfig::kDefaultMaxRepeatCount;
 
-  JsonArray reminders = doc["reminders"].as<JsonArray>();
   if (doc["reminders"].isNull()) {
     errorMessage = "缺少 reminders 数组";
     return false;
   }
 
-  for (JsonObject item : reminders) {
+  for (JsonObject item : doc["reminders"].as<JsonArray>()) {
     ReminderConfig reminder;
     reminder.id = String(item["id"] | "");
     reminder.time = String(item["time"] | "");
@@ -196,6 +184,9 @@ bool ConfigManager::validateConfig(const DeviceConfig& config, String& errorMess
     return false;
   }
 
+  std::vector<String> seenIds;
+  seenIds.reserve(config.reminders.size());
+
   for (const auto& reminder : config.reminders) {
     if (reminder.id.isEmpty()) {
       errorMessage = "提醒 id 不能为空";
@@ -207,17 +198,12 @@ bool ConfigManager::validateConfig(const DeviceConfig& config, String& errorMess
       return false;
     }
 
-    size_t duplicateCount = 0;
-    for (const auto& compareReminder : config.reminders) {
-      if (compareReminder.id == reminder.id) {
-        ++duplicateCount;
-      }
+    if (std::find(seenIds.begin(), seenIds.end(), reminder.id) != seenIds.end()) {
+      errorMessage = "提醒 id 重复";
+      return false;
     }
 
-    if (duplicateCount > 1) {
-        errorMessage = "提醒 id 重复";
-        return false;
-    }
+    seenIds.push_back(reminder.id);
   }
 
   return true;

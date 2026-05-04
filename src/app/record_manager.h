@@ -43,6 +43,7 @@ class RecordManager {
   bool loadTodayRecord();
   bool saveTodayRecord() const;
   DailyRecordItem* findItemByReminderId(const String& reminderId);
+  const DailyRecordItem* findItemByReminderId(const String& reminderId) const;
 
   Storage* _storage = nullptr;
   TimeService* _timeService = nullptr;
