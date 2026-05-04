@@ -8,6 +8,11 @@ Open Pill Reminder is an offline-first, minimalist, fully open source pill remin
 
 This project is not a medical device. It does not provide medical advice and does not identify medicines, dosage, or efficacy. Version 0.1 focuses only on local reminders, local confirmation, and local records.
 
+Open Pill Reminder is an offline-first ESP32 pill reminder box project.
+It uses a local Web console for setup, OLED and buzzer for alerts, buttons for confirmation, and LittleFS for local records.
+The repository includes firmware, documentation, schematics, and PCB files.
+It is not a medical device and does not provide medical advice.
+
 ## Quick Start
 
 - System overview: [DOC/Open_Pill_Reminder_Design.en.md](./DOC/Open_Pill_Reminder_Design.en.md)
