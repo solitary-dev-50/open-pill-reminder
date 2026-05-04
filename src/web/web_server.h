@@ -33,6 +33,11 @@ class AppWebServer {
   void handleNotFound();
   void sendJson(int statusCode, const String& payload);
   bool sendFileFromLittleFs(const char* path, const char* contentType);
+  ConfigManager& configManager() const;
+  RecordManager& recordManager() const;
+  ReminderManager& reminderManager() const;
+  TimeService& timeService() const;
+  Storage& storage() const;
 
   ConfigManager* _configManager = nullptr;
   RecordManager* _recordManager = nullptr;

@@ -32,6 +32,26 @@ const char* methodName(HTTPMethod method) {
 
 }  // namespace
 
+ConfigManager& AppWebServer::configManager() const {
+  return *_configManager;
+}
+
+RecordManager& AppWebServer::recordManager() const {
+  return *_recordManager;
+}
+
+ReminderManager& AppWebServer::reminderManager() const {
+  return *_reminderManager;
+}
+
+TimeService& AppWebServer::timeService() const {
+  return *_timeService;
+}
+
+Storage& AppWebServer::storage() const {
+  return *_storage;
+}
+
 AppWebServer::AppWebServer() : _server(AppConfig::kHttpPort) {}
 
 bool AppWebServer::begin(ConfigManager& configManager, RecordManager& recordManager,
@@ -100,23 +120,18 @@ void AppWebServer::handleGetStatus() {
 
   JsonDocument doc;
   doc["app"] = "小药记";
-  doc["state"] = (_reminderManager != nullptr) ? _reminderManager->getStateName() : "未知";
-  doc["current_time"] = (_timeService != nullptr) ? _timeService->getTimeString() : "--";
-  doc["current_date"] = (_timeService != nullptr) ? _timeService->getDateString() : "--";
-  doc["time_ready"] = (_timeService != nullptr) ? _timeService->isTimeValid() : false;
-  doc["time_status"] =
-      (_timeService != nullptr) ? _timeService->getTimeStatusString() : "未同步";
-  doc["time_source"] = (_timeService != nullptr) ? _timeService->sourceName() : "未知";
-  doc["fs_ready"] = (_storage != nullptr) ? _storage->isReady() : false;
-  doc["next_reminder"] =
-      (_reminderManager != nullptr) ? _reminderManager->getNextReminderText() : "无";
-  doc["active_reminder_id"] =
-      (_reminderManager != nullptr) ? _reminderManager->getActiveReminderId() : "";
-  doc["active_reminder_time"] =
-      (_reminderManager != nullptr) ? _reminderManager->getActiveReminderTime() : "";
-  doc["confirmed_count"] =
-      (_reminderManager != nullptr) ? _reminderManager->getConfirmedCount() : 0;
-  doc["total_count"] = (_reminderManager != nullptr) ? _reminderManager->getTotalCount() : 0;
+  doc["state"] = reminderManager().getStateName();
+  doc["current_time"] = timeService().getTimeString();
+  doc["current_date"] = timeService().getDateString();
+  doc["time_ready"] = timeService().isTimeValid();
+  doc["time_status"] = timeService().getTimeStatusString();
+  doc["time_source"] = timeService().sourceName();
+  doc["fs_ready"] = storage().isReady();
+  doc["next_reminder"] = reminderManager().getNextReminderText();
+  doc["active_reminder_id"] = reminderManager().getActiveReminderId();
+  doc["active_reminder_time"] = reminderManager().getActiveReminderTime();
+  doc["confirmed_count"] = reminderManager().getConfirmedCount();
+  doc["total_count"] = reminderManager().getTotalCount();
   doc["ap_ssid"] = AppConfig::kAccessPointSsid;
   doc["ip"] = WiFi.softAPIP().toString();
 
@@ -127,13 +142,7 @@ void AppWebServer::handleGetStatus() {
 
 void AppWebServer::handleGetConfig() {
   Serial.printf("[网页] %s %s\n", methodName(_server.method()), _server.uri().c_str());
-
-  if (_configManager == nullptr) {
-    sendJson(500, "{\"error\":\"配置管理器不可用\"}");
-    return;
-  }
-
-  sendJson(200, _configManager->toJson(true));
+  sendJson(200, configManager().toJson(true));
 }
 
 void AppWebServer::handlePostConfig() {
@@ -141,18 +150,13 @@ void AppWebServer::handlePostConfig() {
   Serial.printf("[网页] %s %s，body_length=%u。\n", methodName(_server.method()),
                 _server.uri().c_str(), static_cast<unsigned>(body.length()));
 
-  if (_configManager == nullptr) {
-    sendJson(500, "{\"error\":\"配置管理器不可用\"}");
-    return;
-  }
-
   if (body.isEmpty()) {
     sendJson(400, "{\"error\":\"请求体为空\"}");
     return;
   }
 
   String errorMessage;
-  if (!_configManager->applyJson(body, errorMessage)) {
+  if (!configManager().applyJson(body, errorMessage)) {
     JsonDocument doc;
     doc["error"] = errorMessage;
     String payload;
@@ -165,32 +169,19 @@ void AppWebServer::handlePostConfig() {
   doc["ok"] = true;
   String payload;
   serializeJson(doc, payload);
-  if (_reminderManager != nullptr) {
-    _reminderManager->onConfigChanged();
-  }
+  reminderManager().onConfigChanged();
   sendJson(200, payload);
 }
 
 void AppWebServer::handleGetTodayRecords() {
   Serial.printf("[网页] %s %s\n", methodName(_server.method()), _server.uri().c_str());
-
-  if (_recordManager == nullptr) {
-    sendJson(500, "{\"error\":\"记录管理器不可用\"}");
-    return;
-  }
-
-  sendJson(200, _recordManager->toJsonToday(true));
+  sendJson(200, recordManager().toJsonToday(true));
 }
 
 void AppWebServer::handleTimeSync() {
   const String body = _server.arg("plain");
   Serial.printf("[网页] %s %s，body_length=%u。\n", methodName(_server.method()),
                 _server.uri().c_str(), static_cast<unsigned>(body.length()));
-
-  if (_timeService == nullptr) {
-    sendJson(500, "{\"error\":\"时间服务不可用\"}");
-    return;
-  }
 
   if (body.isEmpty()) {
     sendJson(400, "{\"error\":\"请求体为空\"}");
@@ -210,47 +201,36 @@ void AppWebServer::handleTimeSync() {
   Serial.printf("[网页] 时间同步参数：epoch=%lld，timezone_offset_minutes=%ld。\n",
                 static_cast<long long>(epoch), static_cast<long>(timezoneOffsetMinutes));
 
-  if (!_timeService->syncFromBrowser(static_cast<time_t>(epoch), timezoneOffsetMinutes)) {
+  if (!timeService().syncFromBrowser(static_cast<time_t>(epoch), timezoneOffsetMinutes)) {
     sendJson(400, "{\"error\":\"时间戳无效\"}");
     return;
   }
 
-  if (_reminderManager != nullptr) {
-    _reminderManager->onConfigChanged();
-  }
-
+  reminderManager().onConfigChanged();
   sendJson(200, "{\"ok\":true}");
 }
 
 void AppWebServer::handleTestBuzzer() {
   Serial.printf("[网页] %s %s\n", methodName(_server.method()), _server.uri().c_str());
-  if (_reminderManager != nullptr) {
-    _reminderManager->triggerBuzzerTest();
-  }
+  reminderManager().triggerBuzzerTest();
   sendJson(200, "{\"ok\":true}");
 }
 
 void AppWebServer::handleTestLed() {
   Serial.printf("[网页] %s %s\n", methodName(_server.method()), _server.uri().c_str());
-  if (_reminderManager != nullptr) {
-    _reminderManager->triggerLedTest();
-  }
+  reminderManager().triggerLedTest();
   sendJson(200, "{\"ok\":true}");
 }
 
 void AppWebServer::handleTestOled() {
   Serial.printf("[网页] %s %s\n", methodName(_server.method()), _server.uri().c_str());
-  if (_reminderManager != nullptr) {
-    _reminderManager->triggerOledTest();
-  }
+  reminderManager().triggerOledTest();
   sendJson(200, "{\"ok\":true}");
 }
 
 void AppWebServer::handleTriggerReminder() {
   Serial.printf("[网页] %s %s\n", methodName(_server.method()), _server.uri().c_str());
-  if (_reminderManager != nullptr) {
-    _reminderManager->triggerTestReminder();
-  }
+  reminderManager().triggerTestReminder();
   sendJson(200, "{\"ok\":true}");
 }
 
@@ -267,12 +247,7 @@ void AppWebServer::sendJson(int statusCode, const String& payload) {
 }
 
 bool AppWebServer::sendFileFromLittleFs(const char* path, const char* contentType) {
-  if (_storage == nullptr) {
-    Serial.printf("[网页] LittleFS 文件发送失败，存储模块为空，path=%s。\n", path);
-    return false;
-  }
-
-  if (!_storage->isReady()) {
+  if (!storage().isReady()) {
     Serial.printf("[网页] LittleFS 文件发送失败，存储未就绪，path=%s。\n", path);
     return false;
   }
@@ -288,7 +263,7 @@ bool AppWebServer::sendFileFromLittleFs(const char* path, const char* contentTyp
     return false;
   }
 
-  Serial.printf("[网页] 发送静态文件 %s，大小=%u，类型=%s。\n", path,
+  Serial.printf("[网页] 发送静态文件 %s，大小 %u，类型 %s。\n", path,
                 static_cast<unsigned>(file.size()), contentType);
   _server.streamFile(file, contentType);
   file.close();
