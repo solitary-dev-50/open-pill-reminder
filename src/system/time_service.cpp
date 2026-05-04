@@ -88,6 +88,38 @@ String TimeService::getDateTimeString() const {
   return formatWithPattern("%Y-%m-%d %H:%M:%S");
 }
 
+int TimeService::localMinutesOfDay() const {
+  if (!isTimeValid()) {
+    return 0;
+  }
+
+  time_t now = getNowLocal();
+  struct tm currentTm = {};
+  gmtime_r(&now, &currentTm);
+  return currentTm.tm_hour * 60 + currentTm.tm_min;
+}
+
+time_t TimeService::localTimeToUtcEpoch(uint8_t hour, uint8_t minute, uint8_t second) const {
+  if (!isTimeValid()) {
+    return 0;
+  }
+
+  time_t localEpoch = getNowLocal();
+  struct tm localTm = {};
+  gmtime_r(&localEpoch, &localTm);
+  localTm.tm_hour = hour;
+  localTm.tm_min = minute;
+  localTm.tm_sec = second;
+  localTm.tm_isdst = -1;
+
+  const time_t localScheduled = mktime(&localTm);
+  return localScheduled - (_timezoneOffsetMinutes * 60);
+}
+
+std::chrono::seconds TimeService::nowUtcSeconds() const {
+  return std::chrono::seconds{nowEpoch()};
+}
+
 String TimeService::formatWithPattern(const char* pattern) const {
   if (!isTimeValid()) {
     return "--";

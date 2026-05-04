@@ -3,6 +3,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <chrono>
 #include <time.h>
 
 class TimeService {
@@ -19,6 +20,9 @@ class TimeService {
   String getTimeString() const;
   String getDateString() const;
   String getDateTimeString() const;
+  int localMinutesOfDay() const;
+  time_t localTimeToUtcEpoch(uint8_t hour, uint8_t minute, uint8_t second = 0) const;
+  std::chrono::seconds nowUtcSeconds() const;
 
   // Backward-compatible wrappers for current modules.
   bool isReady() const;

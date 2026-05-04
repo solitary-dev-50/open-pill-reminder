@@ -1,6 +1,6 @@
 # Open Pill Reminder / 小药记
 
-Chinese version: [README.md](./README.md)
+Chinese version: [README.md](./README.md) | English docs index: [DOC/KB/README.en.md](./DOC/KB/README.en.md)
 
 [![Build](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml/badge.svg)](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml)
 

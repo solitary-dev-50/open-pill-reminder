@@ -3,6 +3,7 @@
 #include "reminder_manager.h"
 
 #include <algorithm>
+#include <chrono>
 #include <limits>
 
 #include "config_manager.h"
@@ -25,12 +26,10 @@ bool ReminderManager::begin(ConfigManager& configManager, RecordManager& recordM
   _state = _timeService->isTimeValid() ? State::Idle : State::TimeNotSet;
   _forceRender = true;
 
-  if (_led != nullptr) {
-    if (_state == State::TimeNotSet) {
-      _led->showTimeNotSetStatus();
-    } else {
-      _led->showIdleStatus();
-    }
+  if (_state == State::TimeNotSet) {
+    showTimeNotSetVisualState();
+  } else {
+    showIdleVisualState();
   }
 
   Serial.printf("[提醒] 提醒管理器初始化，初始状态=%s。\n", getStateName().c_str());
@@ -40,12 +39,7 @@ bool ReminderManager::begin(ConfigManager& configManager, RecordManager& recordM
 }
 
 void ReminderManager::update() {
-  if (_buzzer != nullptr) {
-    _buzzer->update();
-  }
-  if (_led != nullptr) {
-    _led->update();
-  }
+  updateAlertOutputs();
 
   updateCurrentDay();
   updateRuntimeStateMachine();
@@ -124,12 +118,7 @@ void ReminderManager::triggerOledTest() {
 
 void ReminderManager::triggerTestReminder() {
   Serial.println("[提醒] 触发测试提醒。");
-  if (_buzzer != nullptr) {
-    _buzzer->startAlert();
-  }
-  if (_led != nullptr) {
-    _led->startAlert();
-  }
+  startAlertOutputs();
 
   _state = State::TestAlert;
   _alertUntilMs = millis() + AppConfig::kTestAlertDurationMs;
@@ -140,12 +129,7 @@ void ReminderManager::stopActiveAlert() {
   Serial.printf("[提醒] 停止当前提醒，当前状态=%s，active_index=%d。\n", getStateName().c_str(),
                 _activeReminderIndex);
 
-  if (_buzzer != nullptr) {
-    _buzzer->stop();
-  }
-  if (_led != nullptr) {
-    _led->stopAlert();
-  }
+  stopAlertOutputs();
 
   if (_state == State::TestAlert) {
     _state =
@@ -154,12 +138,10 @@ void ReminderManager::stopActiveAlert() {
     _state = State::Idle;
   }
 
-  if (_led != nullptr) {
-    if (_state == State::TimeNotSet) {
-      _led->showTimeNotSetStatus();
-    } else {
-      _led->showIdleStatus();
-    }
+  if (_state == State::TimeNotSet) {
+    showTimeNotSetVisualState();
+  } else {
+    showIdleVisualState();
   }
 
   _activeReminderIndex = -1;
@@ -266,21 +248,14 @@ void ReminderManager::rebuildForToday(bool forceRecordSync) {
   Serial.printf("[提醒] 开始重建今日提醒，forceRecordSync=%s。\n",
                 forceRecordSync ? "true" : "false");
 
-  if (_buzzer != nullptr) {
-    _buzzer->stop();
-  }
-  if (_led != nullptr) {
-    _led->stopAlert();
-  }
+  stopAlertOutputs();
 
   _runtimes.clear();
   _activeReminderIndex = -1;
 
   if (_configManager == nullptr || _timeService == nullptr || !_timeService->isTimeValid()) {
     _state = State::TimeNotSet;
-    if (_led != nullptr) {
-      _led->showTimeNotSetStatus();
-    }
+    showTimeNotSetVisualState();
     _forceRender = true;
     Serial.println("[提醒] 时间尚未同步，提醒状态设置为 TIME_NOT_SET。");
     return;
@@ -304,7 +279,7 @@ void ReminderManager::rebuildForToday(bool forceRecordSync) {
     runtime.enabled = reminder.enabled;
     runtime.scheduledEpoch = buildTodayEpochForTime(reminder.time);
     runtime.state = reminder.enabled ? RuntimeState::WaitingToday : RuntimeState::Disabled;
-    runtime.nextRepeatEpoch = 0;
+    runtime.nextRepeatEpoch = ReminderRuntime::EpochSeconds{0};
     runtime.repeatCountUsed = 0;
 
     if (_recordManager != nullptr) {
@@ -331,7 +306,8 @@ void ReminderManager::rebuildForToday(bool forceRecordSync) {
     Serial.printf("[提醒] 构建提醒 id=%s, time=%s, enabled=%s, scheduled_epoch=%lld, state=%s, "
                   "repeat_count_used=%u\n",
                   runtime.id.c_str(), runtime.time.c_str(), runtime.enabled ? "true" : "false",
-                  static_cast<long long>(runtime.scheduledEpoch), runtimeStateName(runtime.state),
+                  static_cast<long long>(runtime.scheduledEpoch.count()),
+                  runtimeStateName(runtime.state),
                   static_cast<unsigned>(runtime.repeatCountUsed));
     _runtimes.push_back(runtime);
   }
@@ -345,9 +321,7 @@ void ReminderManager::rebuildForToday(bool forceRecordSync) {
             });
 
   _state = State::Idle;
-  if (_led != nullptr) {
-    _led->showIdleStatus();
-  }
+  showIdleVisualState();
   _forceRender = true;
   Serial.printf("[提醒] 今日提醒重建完成，运行时条目数=%u，状态=%s。\n",
                 static_cast<unsigned>(_runtimes.size()), getStateName().c_str());
@@ -362,9 +336,7 @@ void ReminderManager::updateCurrentDay() {
     if (_state != State::TimeNotSet) {
       Serial.println("[提醒] 时间状态从有效变为无效，切换到 TIME_NOT_SET。");
       _state = State::TimeNotSet;
-      if (_led != nullptr) {
-        _led->showTimeNotSetStatus();
-      }
+      showTimeNotSetVisualState();
       _forceRender = true;
     }
     return;
@@ -389,7 +361,7 @@ void ReminderManager::updateRuntimeStateMachine() {
     return;
   }
 
-  const time_t now = _timeService->nowEpoch();
+  const auto now = _timeService->nowUtcSeconds();
 
   if (_state == State::ReminderAlert && _activeReminderIndex >= 0 &&
       _activeReminderIndex < static_cast<int>(_runtimes.size())) {
@@ -402,9 +374,10 @@ void ReminderManager::updateRuntimeStateMachine() {
       if (runtime.repeatCountUsed < _configManager->getConfig().max_repeat_count) {
         runtime.repeatCountUsed++;
         runtime.state = RuntimeState::WaitingRepeat;
-        runtime.nextRepeatEpoch = now + (_configManager->getConfig().repeat_interval_minutes * 60);
+        runtime.nextRepeatEpoch =
+            now + std::chrono::minutes{_configManager->getConfig().repeat_interval_minutes};
         Serial.printf("[提醒] 进入重复等待 id=%s, next_repeat_epoch=%lld。\n", runtime.id.c_str(),
-                      static_cast<long long>(runtime.nextRepeatEpoch));
+                      static_cast<long long>(runtime.nextRepeatEpoch.count()));
         if (_recordManager != nullptr) {
           _recordManager->updateRecordItem(runtime.id, runtime.time, "pending",
                                            runtime.repeatCountUsed);
@@ -415,17 +388,10 @@ void ReminderManager::updateRuntimeStateMachine() {
       }
 
       if (_state == State::ReminderAlert) {
-        if (_buzzer != nullptr) {
-          _buzzer->stop();
-        }
-        if (_led != nullptr) {
-          _led->stopAlert();
-        }
+        stopAlertOutputs();
         _state = State::Idle;
         _activeReminderIndex = -1;
-        if (_led != nullptr) {
-          _led->showIdleStatus();
-        }
+        showIdleVisualState();
         _forceRender = true;
       }
     }
@@ -457,9 +423,7 @@ void ReminderManager::updateRuntimeStateMachine() {
 
   if (_state == State::TimeNotSet) {
     _state = State::Idle;
-    if (_led != nullptr) {
-      _led->showIdleStatus();
-    }
+    showIdleVisualState();
     _forceRender = true;
     Serial.println("[提醒] 时间已恢复有效，切换回待机状态。");
   }
@@ -483,12 +447,7 @@ void ReminderManager::startReminderAlert(size_t runtimeIndex, bool isRepeat) {
                 static_cast<unsigned>(runtime.repeatCountUsed),
                 static_cast<unsigned>(_alertUntilMs));
 
-  if (_buzzer != nullptr) {
-    _buzzer->startAlert();
-  }
-  if (_led != nullptr) {
-    _led->startAlert();
-  }
+  startAlertOutputs();
 
   if (_recordManager != nullptr) {
     _recordManager->updateRecordItem(runtime.id, runtime.time, "pending", runtime.repeatCountUsed);
@@ -604,38 +563,33 @@ int ReminderManager::currentMinutesOfDay() const {
     return 0;
   }
 
-  time_t now = _timeService->nowLocalEpoch();
-  struct tm currentTm = {};
-  gmtime_r(&now, &currentTm);
-  return currentTm.tm_hour * 60 + currentTm.tm_min;
+  return _timeService->localMinutesOfDay();
 }
 
 int ReminderManager::minutesFromTimeString(const String& value) const {
-  if (!ConfigManager::isValidTimeString(value)) {
+  uint8_t hour = 0;
+  uint8_t minute = 0;
+  if (!ConfigManager::parseTimeString(value, hour, minute)) {
     return -1;
   }
 
-  const int hour = value.substring(0, 2).toInt();
-  const int minute = value.substring(3, 5).toInt();
   return hour * 60 + minute;
 }
 
-time_t ReminderManager::buildTodayEpochForTime(const String& hhmm) const {
+ReminderManager::ReminderRuntime::EpochSeconds ReminderManager::buildTodayEpochForTime(
+    const String& hhmm) const {
   if (_timeService == nullptr || !_timeService->isTimeValid() ||
       !ConfigManager::isValidTimeString(hhmm)) {
-    return 0;
+    return ReminderRuntime::EpochSeconds{0};
   }
 
-  time_t localEpoch = _timeService->nowLocalEpoch();
-  struct tm localTm = {};
-  gmtime_r(&localEpoch, &localTm);
-  localTm.tm_hour = hhmm.substring(0, 2).toInt();
-  localTm.tm_min = hhmm.substring(3, 5).toInt();
-  localTm.tm_sec = 0;
-  localTm.tm_isdst = -1;
+  uint8_t hour = 0;
+  uint8_t minute = 0;
+  if (!ConfigManager::parseTimeString(hhmm, hour, minute)) {
+    return ReminderRuntime::EpochSeconds{0};
+  }
 
-  const time_t localScheduled = mktime(&localTm);
-  return localScheduled - (_timeService->timezoneOffsetMinutes() * 60);
+  return ReminderRuntime::EpochSeconds{_timeService->localTimeToUtcEpoch(hour, minute)};
 }
 
 bool ReminderManager::hasAnyActiveReminderDue() const {
@@ -649,4 +603,43 @@ bool ReminderManager::hasAnyActiveReminderDue() const {
 
 bool ReminderManager::isFinalRuntimeState(RuntimeState state) const {
   return state == RuntimeState::Confirmed || state == RuntimeState::Expired;
+}
+
+void ReminderManager::updateAlertOutputs() {
+  if (_buzzer != nullptr) {
+    _buzzer->update();
+  }
+  if (_led != nullptr) {
+    _led->update();
+  }
+}
+
+void ReminderManager::startAlertOutputs() {
+  if (_buzzer != nullptr) {
+    _buzzer->startAlert();
+  }
+  if (_led != nullptr) {
+    _led->startAlert();
+  }
+}
+
+void ReminderManager::stopAlertOutputs() {
+  if (_buzzer != nullptr) {
+    _buzzer->stop();
+  }
+  if (_led != nullptr) {
+    _led->stopAlert();
+  }
+}
+
+void ReminderManager::showIdleVisualState() {
+  if (_led != nullptr) {
+    _led->showIdleStatus();
+  }
+}
+
+void ReminderManager::showTimeNotSetVisualState() {
+  if (_led != nullptr) {
+    _led->showTimeNotSetStatus();
+  }
 }

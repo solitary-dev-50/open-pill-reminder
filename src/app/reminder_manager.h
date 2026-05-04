@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 
+#include <chrono>
 #include <vector>
 
 class ConfigManager;
@@ -53,12 +54,14 @@ class ReminderManager {
   };
 
   struct ReminderRuntime {
+    using EpochSeconds = std::chrono::seconds;
+
     String id;
     String time;
     bool enabled = true;
     RuntimeState state = RuntimeState::WaitingToday;
-    time_t scheduledEpoch = 0;
-    time_t nextRepeatEpoch = 0;
+    EpochSeconds scheduledEpoch{0};
+    EpochSeconds nextRepeatEpoch{0};
     uint8_t repeatCountUsed = 0;
   };
 
@@ -72,9 +75,14 @@ class ReminderManager {
   String formatNowTimeShort() const;
   int currentMinutesOfDay() const;
   int minutesFromTimeString(const String& value) const;
-  time_t buildTodayEpochForTime(const String& hhmm) const;
+  ReminderRuntime::EpochSeconds buildTodayEpochForTime(const String& hhmm) const;
   bool hasAnyActiveReminderDue() const;
   bool isFinalRuntimeState(RuntimeState state) const;
+  void updateAlertOutputs();
+  void startAlertOutputs();
+  void stopAlertOutputs();
+  void showIdleVisualState();
+  void showTimeNotSetVisualState();
 
   ConfigManager* _configManager = nullptr;
   RecordManager* _recordManager = nullptr;

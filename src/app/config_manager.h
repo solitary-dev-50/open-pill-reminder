@@ -29,6 +29,7 @@ class ConfigManager {
   bool saveCurrent();
 
   static bool isValidTimeString(const String& value);
+  static bool parseTimeString(const String& value, uint8_t& hour, uint8_t& minute);
 
  private:
   bool loadOrCreateDefault();

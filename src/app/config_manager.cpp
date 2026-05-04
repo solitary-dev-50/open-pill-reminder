@@ -77,9 +77,28 @@ bool ConfigManager::isValidTimeString(const String& value) {
     return false;
   }
 
-  const int hour = value.substring(0, 2).toInt();
-  const int minute = value.substring(3, 5).toInt();
+  uint8_t hour = 0;
+  uint8_t minute = 0;
+  if (!parseTimeString(value, hour, minute)) {
+    return false;
+  }
+
   return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
+bool ConfigManager::parseTimeString(const String& value, uint8_t& hour, uint8_t& minute) {
+  if (value.length() != 5 || value.charAt(2) != ':') {
+    return false;
+  }
+
+  if (!isDigit(value.charAt(0)) || !isDigit(value.charAt(1)) || !isDigit(value.charAt(3)) ||
+      !isDigit(value.charAt(4))) {
+    return false;
+  }
+
+  hour = static_cast<uint8_t>(value.substring(0, 2).toInt());
+  minute = static_cast<uint8_t>(value.substring(3, 5).toInt());
+  return hour <= 23 && minute <= 59;
 }
 
 bool ConfigManager::loadOrCreateDefault() {
@@ -177,8 +196,7 @@ bool ConfigManager::validateConfig(const DeviceConfig& config, String& errorMess
     return false;
   }
 
-  for (size_t index = 0; index < config.reminders.size(); ++index) {
-    const ReminderConfig& reminder = config.reminders[index];
+  for (const auto& reminder : config.reminders) {
     if (reminder.id.isEmpty()) {
       errorMessage = "提醒 id 不能为空";
       return false;
@@ -189,11 +207,16 @@ bool ConfigManager::validateConfig(const DeviceConfig& config, String& errorMess
       return false;
     }
 
-    for (size_t compareIndex = index + 1; compareIndex < config.reminders.size(); ++compareIndex) {
-      if (config.reminders[compareIndex].id == reminder.id) {
+    size_t duplicateCount = 0;
+    for (const auto& compareReminder : config.reminders) {
+      if (compareReminder.id == reminder.id) {
+        ++duplicateCount;
+      }
+    }
+
+    if (duplicateCount > 1) {
         errorMessage = "提醒 id 重复";
         return false;
-      }
     }
   }
 

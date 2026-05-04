@@ -1,6 +1,6 @@
 # 小药记 / Open Pill Reminder
 
-English version: [README.en.md](./README.en.md)
+English entry: [README.en.md](./README.en.md) | English docs index: [DOC/KB/README.en.md](./DOC/KB/README.en.md)
 
 [![Build](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml/badge.svg)](https://github.com/solitary-dev-50/open-pill-reminder/actions/workflows/build.yml)
 
